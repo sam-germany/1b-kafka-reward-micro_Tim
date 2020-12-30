@@ -1,17 +1,21 @@
 package com.course.kafka.broker.consumer;
 
 import com.course.kafka.broker.message.OrderMessage;
+import com.course.kafka.broker.message.OrderReplyMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Service;
 
-//@Service
-public class OrderListener {
-    private static final Logger LOG = LoggerFactory.getLogger(OrderListener.class);
+@Service
+public class OrderListenerTwo {
+    private static final Logger LOG = LoggerFactory.getLogger(OrderListenerTwo.class);
 
     @KafkaListener(topics = "t.commodity.order")
-    public void listen(ConsumerRecord<String, OrderMessage> consumerRecord) {
+    @SendTo("t.commodity.order-reply")
+    public OrderReplyMessage listen(ConsumerRecord<String, OrderMessage> consumerRecord) {
           var headers22 = consumerRecord.headers();
           var orderMessage = consumerRecord.value();
 
@@ -30,6 +34,12 @@ var bonusAmount22 = (bonusPercentage22 /100) * orderMessage.getPrice() * orderMe
 
 LOG.info("Surprise bonus is {}" , bonusAmount22);
 
+
+     var replyMessage22 = new OrderReplyMessage();
+     replyMessage22.setReplyMessage(
+               "Order " + orderMessage.getOrderNumber() + " item " + orderMessage.getItemName() + " processed " );
+
+     return replyMessage22;
     }
 }
 /*
